@@ -78,15 +78,8 @@ public static ParameterSpace getParameterSpace()
             Arrays.asList(new String[] { LibSVM.class.getName() })
     );
 
-    // in this example, we only use two feature extractors
-    // - length in tokens
+    // in this example, we only use one feature extractors
     // - frequent n-grams
-    // - emoticon counts
-    // a real experiment would use many more
-    // 
-    // you can use pre-defined ones from
-    // http://code.google.com/p/dkpro-tc/
-    // or write your own extractors
     @SuppressWarnings("unchecked")
     Dimension<List<String>> dimFeatureSets = Dimension.create(
             DIM_FEATURE_SET,
