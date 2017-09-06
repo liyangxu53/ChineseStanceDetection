@@ -15,13 +15,11 @@ import org.apache.uima.resource.ResourceInitializationException;
 
 import de.tudarmstadt.ukp.dkpro.core.api.parameter.ComponentParameters;
 import de.tudarmstadt.ukp.dkpro.core.api.resources.ResourceUtils;
-import de.tudarmstadt.ukp.dkpro.tc.api.io.TCReaderSingleLabel;
 
 
 
 public abstract class AbstractReader
 extends JCasCollectionReader_ImplBase
-implements TCReaderSingleLabel
 {
 	protected final String separator = "\t";
 

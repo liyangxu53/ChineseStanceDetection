@@ -10,14 +10,14 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.Progress;
 import org.apache.uima.util.ProgressImpl;
+import org.dkpro.tc.api.type.TextClassificationOutcome;
 
 import de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData;
-import de.tudarmstadt.ukp.dkpro.tc.api.type.TextClassificationOutcome;
 // import de.tudarmstadt.ukp.dkpro.tc.examples.single.document.WekaSimpleDkproTCReaderDemo;
 
 /**
  * A very basic DKPro TC reader, which reads sentences from a text file and labels from another text
- * file. It is used in {@link WekaSimpleDkproTCReaderDemo}.
+ * file.
  * 
  */
 public class StanceDataReader

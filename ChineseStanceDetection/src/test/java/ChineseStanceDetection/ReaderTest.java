@@ -1,16 +1,14 @@
 package ChineseStanceDetection;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.apache.uima.collection.CollectionReaderDescription;
 import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.fit.pipeline.JCasIterable;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
+import org.dkpro.tc.api.type.TextClassificationOutcome;
 import org.junit.Test;
-
-import ChineseStanceDetection.StanceDataReader;
-import de.tudarmstadt.ukp.dkpro.tc.api.type.TextClassificationOutcome;
 
 public class ReaderTest
 {

@@ -7,34 +7,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 //import org.apache.log4j.BasicConfigurator;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
+import org.apache.uima.collection.CollectionReaderDescription;
+import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.dkpro.lab.Lab;
+import org.dkpro.lab.task.Dimension;
+import org.dkpro.lab.task.ParameterSpace;
+import org.dkpro.tc.api.features.TcFeatureFactory;
+import org.dkpro.tc.api.features.TcFeatureSet;
+import org.dkpro.tc.core.Constants;
+import org.dkpro.tc.features.length.NrOfTokensPerSentence;
+import org.dkpro.tc.features.twitter.EmoticonRatio;
+import org.dkpro.tc.features.twitter.NumberOfHashTags;
+import org.dkpro.tc.ml.ExperimentCrossValidation;
+import org.dkpro.tc.ml.ExperimentTrainTest;
+import org.dkpro.tc.ml.report.BatchCrossValidationReport;
+import org.dkpro.tc.ml.report.BatchTrainTestReport;
+import org.dkpro.tc.ml.weka.WekaClassificationAdapter;
 
-import ChineseStanceDetection.StanceDataReader;
-
-import weka.classifiers.functions.LibSVM;
+import de.tudarmstadt.ukp.dkpro.core.languagetool.LanguageToolSegmenter;
+import weka.classifiers.bayes.NaiveBayes;
 //import weka.classifiers.functions.LinearRegression;
 //import weka.classifiers.bayes.NaiveBayes;
 //import weka.classifiers.functions.SMO;
-import de.tudarmstadt.ukp.dkpro.core.languagetool.LanguageToolSegmenter;
-import de.tudarmstadt.ukp.dkpro.lab.Lab;
-import de.tudarmstadt.ukp.dkpro.lab.task.Dimension;
-import de.tudarmstadt.ukp.dkpro.lab.task.ParameterSpace;
-import de.tudarmstadt.ukp.dkpro.lab.task.impl.BatchTask.ExecutionPolicy;
-import de.tudarmstadt.ukp.dkpro.tc.core.Constants;
 //import de.tudarmstadt.ukp.dkpro.tc.features.length.NrOfTokensFeatureExtractor;
-import de.tudarmstadt.ukp.dkpro.tc.features.ngram.base.NGramFeatureExtractorBase;
-import de.tudarmstadt.ukp.dkpro.tc.weka.report.BatchCrossValidationReport;
-import de.tudarmstadt.ukp.dkpro.tc.weka.report.BatchOutcomeIDReport;
-import de.tudarmstadt.ukp.dkpro.tc.weka.report.BatchTrainTestReport;
-import de.tudarmstadt.ukp.dkpro.tc.weka.report.ClassificationReport;
-import de.tudarmstadt.ukp.dkpro.tc.weka.task.BatchTaskCrossValidation;
-import de.tudarmstadt.ukp.dkpro.tc.weka.task.BatchTaskTrainTest;
 //import de.tudarmstadt.ukp.dkpro.tc.weka.writer.WekaDataWriter;
 
 public class StanceDetectionTC
-implements Constants
+	implements Constants
 {
 public static final String LANGUAGE_CODE = "zh";
 
@@ -44,133 +47,95 @@ public static final String corpusFilePathTrain = "src/main/resources/TrainingDat
 public static final String corpusFilePathTest = "src/main/resources/TestData.txt";
 
 public static void main(String[] args)
-    throws Exception
-{
-	//BasicConfigurator.configure();
-    ParameterSpace pSpace = getParameterSpace();
+        throws Exception
+    {
 
-    StanceDetectionTC experiment = new StanceDetectionTC();
-    //experiment.runCrossValidation(pSpace);
-    
-    // enable when test data is available
-    experiment.runTrainTest(pSpace);
-}
+        // This is used to ensure that the required DKPRO_HOME environment variable is set.
+        // Ensures that people can run the experiments even if they haven't read the setup
+        // instructions first :)
+        // Don't use this in real experiments! Read the documentation and set DKPRO_HOME as
+        // explained there.
+//        DemoUtils.setDkproHome(WekaTwitterSentimentDemo.class.getSimpleName());
+    	System.setProperty("DKPRO_HOME", System.getProperty("user.home")+"/Desktop/");
 
-public static ParameterSpace getParameterSpace()
-{
-    // configure training and test data reader dimension
-    Map<String, Object> dimReaders = new HashMap<String, Object>();
-    dimReaders.put(DIM_READER_TRAIN, StanceDataReader.class);
-    dimReaders.put(DIM_READER_TRAIN_PARAMS, Arrays.asList(new Object[] {
-    		StanceDataReader.PARAM_SOURCE_LOCATION, corpusFilePathTrain,
-    		StanceDataReader.PARAM_LANGUAGE, LANGUAGE_CODE }
-    ));
-    dimReaders.put(DIM_READER_TEST, StanceDataReader.class);
-    dimReaders.put(DIM_READER_TEST_PARAMS, Arrays.asList(new Object[] {
-    		StanceDataReader.PARAM_SOURCE_LOCATION, corpusFilePathTest,
-    		StanceDataReader.PARAM_LANGUAGE, LANGUAGE_CODE}
-    ));
+        ParameterSpace pSpace = getParameterSpace();
 
-    // lets try svm classifier from Weka
-    @SuppressWarnings("unchecked")
-    Dimension<List<String>> dimClassificationArgs = Dimension.create(
-            DIM_CLASSIFICATION_ARGS,
-            Arrays.asList(new String[] { LibSVM.class.getName() })
-    );
-
-    // in this example, we only use one feature extractors
-    // - frequent n-grams
-    @SuppressWarnings("unchecked")
-    Dimension<List<String>> dimFeatureSets = Dimension.create(
-            DIM_FEATURE_SET,
-            /*Arrays.asList(new String[] {
-                    NrOfTokensFeatureExtractor.class.getName()
-                    
-            }),
-            Arrays.asList(new String[] {
-                    NrOfTokensFeatureExtractor.class.getName(),
-                    NGramFeatureExtractor.class.getName() 
-            }),
-            Arrays.asList(new String[] {
-                    NrOfTokensFeatureExtractor.class.getName(),
-                    NGramFeatureExtractor.class.getName(),
-                    EmoticonFeatureExtractor.class.getName()                     
-            })
-*/          Arrays.asList(new String[] {
-				    NGramFeatureExtractorBase.class.getName(),                   
-            })
-    );
-    
-    // configuring feature extractors
-    // 
-    // each group represents one run with the corresponding parameters
-    @SuppressWarnings("unchecked")
-    Dimension<List<Object>> dimPipelineParameters = Dimension.create(
-            DIM_PIPELINE_PARAMS,
-            Arrays.asList(new Object[] {
-            		NGramFeatureExtractorBase.PARAM_NGRAM_USE_TOP_K, "50",
-            		NGramFeatureExtractorBase.PARAM_NGRAM_MIN_N, 1,
-            		NGramFeatureExtractorBase.PARAM_NGRAM_MAX_N, 3
-            }),
-            Arrays.asList(new Object[] {
-            		NGramFeatureExtractorBase.PARAM_NGRAM_USE_TOP_K, "100",
-            		NGramFeatureExtractorBase.PARAM_NGRAM_MIN_N, 1,
-            		NGramFeatureExtractorBase.PARAM_NGRAM_MAX_N, 3
-            })
-    );
+        StanceDetectionTC experiment = new StanceDetectionTC();
+//        experiment.runCrossValidation(pSpace);
+        experiment.runTrainTest(pSpace);
+    }
 
     @SuppressWarnings("unchecked")
-    ParameterSpace pSpace = new ParameterSpace(
-            Dimension.createBundle("readers", dimReaders),
-            //Dimension.create(DIM_DATA_WRITER, WekaDataWriter.class.getName()),
-            //Dimension.create(DIM_MULTI_LABEL, false),
-            Dimension.create(DIM_FEATURE_MODE, LM_SINGLE_LABEL),
-            Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT),
-            dimPipelineParameters,
-            dimFeatureSets,
-            dimClassificationArgs
-    );
+    public static ParameterSpace getParameterSpace()
+        throws ResourceInitializationException
+    {
+        // configure training and test data reader dimension
+        // train/test will use both, while cross-validation will only use the train part
+        // The reader is also responsible for setting the labels/outcome on all
+        // documents/instances it creates.
+        Map<String, Object> dimReaders = new HashMap<String, Object>();
 
-    return pSpace;
-}
+        CollectionReaderDescription readerTrain = CollectionReaderFactory.createReaderDescription(
+                StanceDataReader.class, StanceDataReader.PARAM_SOURCE_LOCATION,
+                "PATH_HERE", StanceDataReader.PARAM_LANGUAGE, "en");
+        dimReaders.put(DIM_READER_TRAIN, readerTrain);
 
-// ##### CV #####
-protected void runCrossValidation(ParameterSpace pSpace)
-    throws Exception
-{
+        CollectionReaderDescription readerTest = CollectionReaderFactory.createReaderDescription(
+        		StanceDataReader.class, StanceDataReader.PARAM_SOURCE_LOCATION,
+                "PATH_HERE", StanceDataReader.PARAM_LANGUAGE, "en");
+        dimReaders.put(DIM_READER_TEST, readerTest);
 
-    BatchTaskCrossValidation batch = new BatchTaskCrossValidation("SemEval2014_Task9_Subtask_B_CV",
-            getPreprocessing(), NUM_FOLDS);
-    batch.addInnerReport(ClassificationReport.class);
-    batch.setExecutionPolicy(ExecutionPolicy.RUN_AGAIN);
-    batch.addReport(BatchCrossValidationReport.class);
+        Dimension<List<String>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,
+                Arrays.asList(new String[] { NaiveBayes.class.getName() }));
 
-    // Run
-    Lab.getInstance().run(batch);
-}
+        
+        Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(
+                DIM_FEATURE_SET,
+                new TcFeatureSet(TcFeatureFactory.create(NrOfTokensPerSentence.class),
+                        TcFeatureFactory.create(EmoticonRatio.class),
+                        TcFeatureFactory.create(NumberOfHashTags.class)));
+        
+        ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
+                Dimension.create(DIM_LEARNING_MODE, LM_SINGLE_LABEL),
+                Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT), dimFeatureSets,
+                dimClassificationArgs);
 
-// ##### TRAIN-TEST #####
-protected void runTrainTest(ParameterSpace pSpace)
-    throws Exception
-{
+        return pSpace;
+    }
 
-    BatchTaskTrainTest batch = new BatchTaskTrainTest("SemEval2014_Task9_Subtask_B_TrainTest",
-            getPreprocessing());
-    batch.addInnerReport(ClassificationReport.class);
-    batch.setParameterSpace(pSpace);
-    batch.setExecutionPolicy(ExecutionPolicy.RUN_AGAIN);
-    batch.addReport(BatchTrainTestReport.class);
-    batch.addReport(BatchOutcomeIDReport.class);
+    // ##### CV #####
+    protected void runCrossValidation(ParameterSpace pSpace)
+        throws Exception
+    {
+        ExperimentCrossValidation batch = new ExperimentCrossValidation("TwitterSentimentCV",
+                WekaClassificationAdapter.class, 3);
+        batch.setPreprocessing(getPreprocessing());
+        batch.setParameterSpace(pSpace);
+        batch.addReport(BatchCrossValidationReport.class);
 
-    // Run
-    Lab.getInstance().run(batch);
-}
+        // Run
+        Lab.getInstance().run(batch);
+    }
 
-protected AnalysisEngineDescription getPreprocessing()
-    throws ResourceInitializationException
-{
-    return createEngineDescription(
-        createEngineDescription(LanguageToolSegmenter.class)
-    );
-}
+    // ##### TRAIN-TEST #####
+    protected void runTrainTest(ParameterSpace pSpace)
+        throws Exception
+    {
+        ExperimentTrainTest batch = new ExperimentTrainTest("Stance",
+                WekaClassificationAdapter.class);
+        batch.setPreprocessing(getPreprocessing());
+        batch.setParameterSpace(pSpace);
+        batch.addReport(BatchTrainTestReport.class);
+
+        // Run
+        Lab.getInstance().run(batch);
+    }
+
+    protected AnalysisEngineDescription getPreprocessing()
+        throws ResourceInitializationException
+    {
+        return createEngineDescription(
+        		createEngineDescription(LanguageToolSegmenter.class)
+        );
+    }
 }
