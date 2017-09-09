@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-//import org.apache.log4j.BasicConfigurator;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReaderDescription;
 import org.apache.uima.fit.factory.CollectionReaderFactory;
@@ -43,8 +41,8 @@ public static final String LANGUAGE_CODE = "zh";
 
 public static int NUM_FOLDS = 3;
 
-public static final String corpusFilePathTrain = "src/main/resources/TrainingData.txt";
-public static final String corpusFilePathTest = "src/main/resources/TestData.txt";
+//public static final String corpusFilePathTrain = "src/main/resources/train.txt";
+//public static final String corpusFilePathTest = "src/main/resources/test.txt";
 
 public static void main(String[] args)
         throws Exception
@@ -77,12 +75,12 @@ public static void main(String[] args)
 
         CollectionReaderDescription readerTrain = CollectionReaderFactory.createReaderDescription(
                 StanceDataReader.class, StanceDataReader.PARAM_SOURCE_LOCATION,
-                "PATH_HERE", StanceDataReader.PARAM_LANGUAGE, "en");
+                "src/main/resources/train.txt", StanceDataReader.PARAM_LANGUAGE, LANGUAGE_CODE);
         dimReaders.put(DIM_READER_TRAIN, readerTrain);
 
         CollectionReaderDescription readerTest = CollectionReaderFactory.createReaderDescription(
         		StanceDataReader.class, StanceDataReader.PARAM_SOURCE_LOCATION,
-                "PATH_HERE", StanceDataReader.PARAM_LANGUAGE, "en");
+        		"src/main/resources/test.txt", StanceDataReader.PARAM_LANGUAGE, LANGUAGE_CODE);
         dimReaders.put(DIM_READER_TEST, readerTest);
 
         Dimension<List<String>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,
@@ -107,8 +105,8 @@ public static void main(String[] args)
     protected void runCrossValidation(ParameterSpace pSpace)
         throws Exception
     {
-        ExperimentCrossValidation batch = new ExperimentCrossValidation("TwitterSentimentCV",
-                WekaClassificationAdapter.class, 3);
+        ExperimentCrossValidation batch = new ExperimentCrossValidation("StanceCV",
+                WekaClassificationAdapter.class, NUM_FOLDS);
         batch.setPreprocessing(getPreprocessing());
         batch.setParameterSpace(pSpace);
         batch.addReport(BatchCrossValidationReport.class);

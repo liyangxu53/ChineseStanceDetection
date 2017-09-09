@@ -16,7 +16,7 @@ public class ReaderTest
     public void combinationReaderTest() throws Exception {
         CollectionReaderDescription reader = CollectionReaderFactory.createReaderDescription(
                 StanceDataReader.class,
-                StanceDataReader.PARAM_SOURCE_LOCATION, "sampleData.txt"
+                StanceDataReader.PARAM_SOURCE_LOCATION, "src/main/resources/train.txt"
         );
         
         int i = 0;

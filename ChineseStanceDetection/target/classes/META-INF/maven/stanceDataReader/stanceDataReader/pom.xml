@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+ <modelVersion>4.0.0</modelVersion>
 
   <groupId>stanceDataReader</groupId>
   <artifactId>stanceDataReader</artifactId>
@@ -15,75 +15,27 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
     
   	
-	<dependency>
-    <groupId>de.tudarmstadt.ukp.dkpro.tc</groupId>
-    <artifactId>dkpro-tc-api</artifactId>
-    <version>0.7.0</version>
-	</dependency>
 	
 	<dependency>
     	<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
     	<artifactId>
     		de.tudarmstadt.ukp.dkpro.core.languagetool-asl
     	</artifactId>
-    	<version>1.8.0</version>
     </dependency>
     
-    <dependency>
-    <groupId>de.tudarmstadt.ukp.dkpro.tc</groupId>
-    <artifactId>dkpro-tc-features-ngram</artifactId>
-    <version>0.7.0</version>
-	</dependency>
 	
-	<dependency>
-    <groupId>de.tudarmstadt.ukp.dkpro.tc</groupId>
-    <artifactId>dkpro-tc-features</artifactId>
-    <version>0.7.0</version>
-	</dependency>
 	
-	<dependency>
-    <groupId>de.tudarmstadt.ukp.dkpro.lab</groupId>
-    <artifactId>dkpro-lab-core</artifactId>
-    <version>0.11.0</version>
-	</dependency>
 	
     <dependency>
 		<groupId>org.apache.uima</groupId>
 		<artifactId>uimafit-core</artifactId>
-		<version>2.2.0</version>
 	</dependency>	
 	
-	<dependency>
-    <groupId>de.tudarmstadt.ukp.dkpro.tc</groupId>
-    <artifactId>dkpro-tc-core</artifactId>
-    <version>0.7.0</version>
-	</dependency>
 	
-	<dependency>
-    <groupId>de.tudarmstadt.ukp.dkpro.tc</groupId>
-    <artifactId>dkpro-tc-weka</artifactId>
-    <version>0.6.0</version>
-	</dependency>
 	
-	<dependency>
-    <groupId>de.tudarmstadt.ukp.dkpro.tc</groupId>
-    <artifactId>dkpro-tc-ml</artifactId>
-    <version>0.7.0</version>
-	</dependency>
 	
-	<dependency>
-    <groupId>nz.ac.waikato.cms.weka</groupId>
-    <artifactId>LibSVM</artifactId>
-    <version>1.0.10</version>
-	</dependency>
 		
 	
 	<dependency>
@@ -91,7 +43,48 @@
     	<artifactId>
     		de.tudarmstadt.ukp.dkpro.core.io.text-asl
     	</artifactId>
-    	<version>1.8.0</version>
     </dependency>
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.dkpro.tc</groupId>
+		<artifactId>dkpro-tc-api</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.dkpro.tc</groupId>
+		<artifactId>dkpro-tc-core</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.dkpro.tc</groupId>
+		<artifactId>dkpro-tc-ml-weka</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.dkpro.tc</groupId>
+		<artifactId>dkpro-tc-features-ngram</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.dkpro.tc</groupId>
+		<artifactId>dkpro-tc-features</artifactId>
+	</dependency>
   </dependencies>
+  <dependencyManagement>
+  	<dependencies>
+  		<dependency>
+  			<groupId>org.dkpro.tc</groupId>
+  			<artifactId>dkpro-tc</artifactId>
+  			<version>0.9.0</version>
+  			<type>pom</type>
+  			<scope>import</scope>
+  		</dependency>
+  		<dependency>
+  			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+  			<artifactId>de.tudarmstadt.ukp.dkpro.core</artifactId>
+  			<version>1.8.0</version>
+  			<type>pom</type>
+  			<scope>import</scope>
+  		</dependency>
+  	</dependencies>
+  </dependencyManagement>
 </project>
