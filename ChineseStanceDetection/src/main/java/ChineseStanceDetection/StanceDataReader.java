@@ -38,9 +38,9 @@ public class StanceDataReader
         
         for (String line:rawData) {
         		String[] item = line.split(separator);
-        		if(item.length != 4){
-        			throw new ResourceInitializationException("Parsing error. Line must have 4 segments.", item);
-        		}
+        		//if(item.length != 4){
+        		//	throw new ResourceInitializationException("Parsing error. Line must have 4 segments.", item);
+        		//}
         		items.add(item);
         }             
 
@@ -74,7 +74,7 @@ public class StanceDataReader
         DocumentMetaData dmd = DocumentMetaData.create(aJCas);
         dmd.setDocumentTitle(new Integer(currentIndex).toString());
         dmd.setDocumentUri(target + "#" + id);
-        dmd.setDocumentId(corpusFile);
+        dmd.setDocumentId(id);
 
         // setting the outcome / label for this document
         TextClassificationOutcome outcome = new TextClassificationOutcome(aJCas);
