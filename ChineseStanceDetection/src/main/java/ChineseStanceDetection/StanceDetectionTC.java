@@ -41,8 +41,8 @@ public static final String LANGUAGE_CODE = "zh";
 
 public static int NUM_FOLDS = 3;
 
-//public static final String corpusFilePathTrain = "src/main/resources/train.txt";
-//public static final String corpusFilePathTest = "src/main/resources/test.txt";
+public static final String corpusFilePathTrain = "src/main/resources/train.txt";
+public static final String corpusFilePathTest = "src/main/resources/test.txt";
 
 public static void main(String[] args)
         throws Exception
@@ -59,8 +59,8 @@ public static void main(String[] args)
         ParameterSpace pSpace = getParameterSpace();
 
         StanceDetectionTC experiment = new StanceDetectionTC();
-//        experiment.runCrossValidation(pSpace);
-        experiment.runTrainTest(pSpace);
+        experiment.runCrossValidation(pSpace);
+        //experiment.runTrainTest(pSpace);
     }
 
     @SuppressWarnings("unchecked")
@@ -75,12 +75,12 @@ public static void main(String[] args)
 
         CollectionReaderDescription readerTrain = CollectionReaderFactory.createReaderDescription(
                 StanceDataReader.class, StanceDataReader.PARAM_SOURCE_LOCATION,
-                "src/main/resources/train.txt", StanceDataReader.PARAM_LANGUAGE, LANGUAGE_CODE);
+                corpusFilePathTrain, StanceDataReader.PARAM_LANGUAGE, LANGUAGE_CODE);
         dimReaders.put(DIM_READER_TRAIN, readerTrain);
 
         CollectionReaderDescription readerTest = CollectionReaderFactory.createReaderDescription(
         		StanceDataReader.class, StanceDataReader.PARAM_SOURCE_LOCATION,
-        		"src/main/resources/test.txt", StanceDataReader.PARAM_LANGUAGE, LANGUAGE_CODE);
+        		corpusFilePathTest, StanceDataReader.PARAM_LANGUAGE, LANGUAGE_CODE);
         dimReaders.put(DIM_READER_TEST, readerTest);
 
         Dimension<List<String>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,

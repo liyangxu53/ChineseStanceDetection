@@ -63,11 +63,11 @@ extends JCasCollectionReader_ImplBase
 	}
 
 	
-/*	protected String preprocessTweet(String tweet){
+	protected String preprocessTweet(String tweet){
 	
 	String regex = "\\(?\\b(http://|www[.])[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
 	tweet.replaceAll(regex, "hyperlink");    	
 	
 	return tweet;
-	}*/
+	}
 }
