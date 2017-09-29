@@ -62,7 +62,7 @@ public class StanceDataReader
         
         String id = item[0];
         String target = item[1];
-        String text = preprocessTweet(item[2]);
+        String text = preprocessText(item[2]);
         String stance = item[3];
         
         aJCas.setDocumentText(text);

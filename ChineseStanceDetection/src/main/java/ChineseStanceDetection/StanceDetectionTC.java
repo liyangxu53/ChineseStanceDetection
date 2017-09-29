@@ -14,12 +14,17 @@ import org.apache.uima.resource.ResourceInitializationException;
 import org.dkpro.lab.Lab;
 import org.dkpro.lab.task.Dimension;
 import org.dkpro.lab.task.ParameterSpace;
+import org.dkpro.lab.task.BatchTask.ExecutionPolicy;
 import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
-import org.dkpro.tc.features.length.NrOfTokensPerSentence;
-import org.dkpro.tc.features.twitter.EmoticonRatio;
-import org.dkpro.tc.features.twitter.NumberOfHashTags;
+import org.dkpro.tc.features.ngram.LuceneNGram;
+import org.dkpro.tc.features.length.NrOfTokens;
+//import org.dkpro.tc.ml.libsvm.LibsvmAdapter;
+//import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.functions.LibSVM;
+
+
 import org.dkpro.tc.ml.ExperimentCrossValidation;
 import org.dkpro.tc.ml.ExperimentTrainTest;
 import org.dkpro.tc.ml.report.BatchCrossValidationReport;
@@ -27,12 +32,7 @@ import org.dkpro.tc.ml.report.BatchTrainTestReport;
 import org.dkpro.tc.ml.weka.WekaClassificationAdapter;
 
 import de.tudarmstadt.ukp.dkpro.core.languagetool.LanguageToolSegmenter;
-import weka.classifiers.bayes.NaiveBayes;
 //import weka.classifiers.functions.LinearRegression;
-//import weka.classifiers.bayes.NaiveBayes;
-//import weka.classifiers.functions.SMO;
-//import de.tudarmstadt.ukp.dkpro.tc.features.length.NrOfTokensFeatureExtractor;
-//import de.tudarmstadt.ukp.dkpro.tc.weka.writer.WekaDataWriter;
 
 public class StanceDetectionTC
 	implements Constants
@@ -84,18 +84,23 @@ public static void main(String[] args)
         dimReaders.put(DIM_READER_TEST, readerTest);
 
         Dimension<List<String>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,
-                Arrays.asList(new String[] { NaiveBayes.class.getName() }));
+                Arrays.asList(new String[] { LibSVM.class.getName() }));
 
         
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(
                 DIM_FEATURE_SET,
-                new TcFeatureSet(TcFeatureFactory.create(NrOfTokensPerSentence.class),
-                        TcFeatureFactory.create(EmoticonRatio.class),
-                        TcFeatureFactory.create(NumberOfHashTags.class)));
+                new TcFeatureSet(TcFeatureFactory.create(NrOfTokens.class),
+                					TcFeatureFactory.create(LuceneNGram.class, 
+                							LuceneNGram.PARAM_NGRAM_USE_TOP_K, 100,
+                							LuceneNGram.PARAM_NGRAM_MIN_N, 1, 
+                							LuceneNGram.PARAM_NGRAM_MAX_N, 3)));
+               
+        		
         
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
                 Dimension.create(DIM_LEARNING_MODE, LM_SINGLE_LABEL),
-                Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT), dimFeatureSets,
+                Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT),
+                dimFeatureSets,
                 dimClassificationArgs);
 
         return pSpace;
@@ -106,9 +111,10 @@ public static void main(String[] args)
         throws Exception
     {
         ExperimentCrossValidation batch = new ExperimentCrossValidation("StanceCV",
-                WekaClassificationAdapter.class, NUM_FOLDS);
+        		WekaClassificationAdapter.class, NUM_FOLDS);
         batch.setPreprocessing(getPreprocessing());
         batch.setParameterSpace(pSpace);
+        batch.setExecutionPolicy(ExecutionPolicy.RUN_AGAIN);
         batch.addReport(BatchCrossValidationReport.class);
 
         // Run
@@ -120,9 +126,11 @@ public static void main(String[] args)
         throws Exception
     {
         ExperimentTrainTest batch = new ExperimentTrainTest("Stance",
-                WekaClassificationAdapter.class);
+        		WekaClassificationAdapter.class);
         batch.setPreprocessing(getPreprocessing());
         batch.setParameterSpace(pSpace);
+        batch.setExecutionPolicy(ExecutionPolicy.RUN_AGAIN);
+
         batch.addReport(BatchTrainTestReport.class);
 
         // Run
